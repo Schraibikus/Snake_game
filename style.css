@@ -1,0 +1,85 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Press Start 2P", system-ui;
+}
+
+.cell-items {
+  background-image: url("/pictures/fone.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 3px solid tomato;
+  border-radius: 5px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--sideField), 25px);
+  grid-template-rows: repeat(var(--sideField), 25px);
+  gap: 1px;
+  cursor: pointer;
+}
+
+#score,
+#record {
+  color: gold;
+}
+
+.btn {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #555;
+  color: tomato;
+  font-size: 20px;
+  font-family: "Press Start 2P", system-ui;
+}
+
+.btn--invisible {
+  display: none;
+}
+
+.title {
+  color: goldenrod;
+  margin-bottom: 20px;
+}
+
+.score,
+.record {
+  font-size: 20px;
+  color: tomato;
+  margin-bottom: 20px;
+}
+
+.cell {
+  background-color: transparent;
+}
+
+.food {
+  background-image: url("/pictures/pica.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.snake-unit {
+  background-image: url("/pictures/ball.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: all 0.5s;
+  transform: scale(1.2);
+}
