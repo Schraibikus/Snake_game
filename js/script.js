@@ -1,10 +1,12 @@
+"use strict";
+
 let snake = [];
 let direction = "y+"; // Ползем направо
 var snakeSpeed = 500;
 let snakeTimer;
 let score = 0;
 let iKnowSideOfField = findSideField();
-// let iKnowSideOfField = 15;
+// let iKnowSideOfField = 15; //для отладки, чтобы каждый раз модалка не всплывала
 let myRecord = 0;
 let btnRestart;
 let btnRecordClear;
@@ -82,7 +84,7 @@ function createGameField(iKnowSideOfField) {
       gameField.appendChild(cell);
     }
   }
-  document.getElementById("game-field").appendChild(gameField);
+  return document.getElementById("game-field").appendChild(gameField);
 }
 
 // Создаем змейку
@@ -152,9 +154,11 @@ function giveMeFood(unit) {
   // Нашли яблоко
   if (unitId.includes("food")) {
     check = true;
+    //Удаляем яблоко с поля
     unit.setAttribute("class", unitId[0] + " snake-unit");
     // Создаем новое яблоко
     createFood();
+    //Увеличиваем счёт
     score++;
   }
   return check;
