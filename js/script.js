@@ -1,15 +1,19 @@
 "use strict";
 
 let snake = [];
-let direction = "y+"; // Ползем направо
-var snakeSpeed = 500;
-let snakeTimer;
+let direction = "right"; // Ползем направо
+let snakeSpeedConst = 500;
+let snakeSpeedFast = 300;
 let score = 0;
+let snakeTimerConstant;
+let snakeTimerFast;
+let steps = false;
 let iKnowSideOfField = findSideField();
 // let iKnowSideOfField = 15; //для отладки, чтобы каждый раз модалка не всплывала
 let myRecord = 0;
 let btnRestart;
 let btnRecordClear;
+let easyLevel;
 
 function initGame() {
   // Скрываем кнопки рестарта и обнуления рекорда
@@ -19,6 +23,10 @@ function initGame() {
   btnRecordClear.classList.add("btn--invisible");
 
   createGameField(iKnowSideOfField);
+  // При желании игрок может активировать лёгкий режим
+  easyLevel = confirm(
+    "Включить лёгкий режим? (Змейка не будет наталкиваться на край поля, небольшая скорость)"
+  );
   startGame();
   // Храним рекорд в localStorage
   document.addEventListener("DOMContentLoaded", () => {
@@ -36,9 +44,11 @@ function initGame() {
 }
 
 function startGame() {
-  // gameIsRunning = true;
   createSnake();
-  snakeTimer = setInterval(() => move(), snakeSpeed);
+  if (easyLevel)
+    snakeTimerConstant = setInterval(() => move(), snakeSpeedConst);
+  if (!easyLevel) snakeTimerFast = setInterval(() => move(), snakeSpeedFast);
+
   //Яблоко появится не сразу, через 1500 ms
   setTimeout(createFood, 1500);
 }
@@ -67,24 +77,28 @@ function findSideField() {
 
 // Создаем игровое поля с заданными игроком размерами
 function createGameField(iKnowSideOfField) {
-  let gameField = document.createElement("div");
-  gameField.setAttribute("class", "cell-items");
+  let gameField = document.querySelector(".game-field");
   gameField.style.setProperty("--sideField", iKnowSideOfField);
 
-  //в цикле генерируем ячейки игрового поля
-  for (let i = 1; i <= iKnowSideOfField; i++) {
-    for (let j = 1; j <= iKnowSideOfField; j++) {
-      let cell = document.createElement("div");
-      cell.setAttribute("class", "cell");
-      // через id мне показалось, что сделать легче
-      cell.id = `cell-${i}-${j}`;
-      // через data-аттрибуты не хватило знаний, но я пытался))
-      // cell.setAttribute("data-x", `${i}`);
-      // cell.setAttribute("data-y", `${j}`);
-      gameField.appendChild(cell);
-    }
+  for (let i = 1; i < iKnowSideOfField ** 2 + 1; i++) {
+    let cell = document.createElement("div");
+    gameField.appendChild(cell);
+    cell.classList.add("cell");
   }
-  return document.getElementById("game-field").appendChild(gameField);
+
+  let cell = document.getElementsByClassName("cell");
+  let x = 1,
+    y = iKnowSideOfField;
+  for (let i = 0; i < cell.length; i++) {
+    if (x > iKnowSideOfField) {
+      x = 1;
+      y--;
+    }
+    cell[i].id = `cell-${x}-${y}`;
+    x++;
+  }
+
+  return document.querySelector(".game-field");
 }
 
 // Создаем змейку
@@ -105,20 +119,60 @@ function createSnake() {
 // Движение змейки
 function move() {
   let snakeHeadClasses = snake[snake.length - 1].getAttribute("id").split(" ");
-
   let newUnit;
   let snakeCoords = snakeHeadClasses[0].split("-");
   let coordX = Number(snakeCoords[1]);
   let coordY = Number(snakeCoords[2]);
 
-  if (direction == "y+") {
-    newUnit = document.getElementById("cell-" + coordX + "-" + (coordY + 1));
-  } else if (direction == "y-") {
-    newUnit = document.getElementById("cell-" + coordX + "-" + (coordY - 1));
-  } else if (direction == "x+") {
-    newUnit = document.getElementById("cell-" + (coordX + 1) + "-" + coordY);
-  } else if (direction == "x-") {
-    newUnit = document.getElementById("cell-" + (coordX - 1) + "-" + coordY);
+  // Реализация переключения режимов игры
+  if (easyLevel) {
+    if (direction == "right") {
+      if (coordX < iKnowSideOfField) {
+        newUnit = document.getElementById(
+          "cell-" + (coordX + 1) + "-" + coordY
+        );
+      } else {
+        newUnit = document.getElementById("cell-" + "1" + "-" + coordY);
+      }
+    } else if (direction == "left") {
+      if (coordX > 1) {
+        newUnit = document.getElementById(
+          "cell-" + (coordX - 1) + "-" + coordY
+        );
+      } else {
+        newUnit = document.getElementById(
+          "cell-" + `${iKnowSideOfField}` + "-" + coordY
+        );
+      }
+    } else if (direction == "down") {
+      if (coordY > 1) {
+        newUnit = document.getElementById(
+          "cell-" + coordX + "-" + (coordY - 1)
+        );
+      } else {
+        newUnit = document.getElementById(
+          "cell-" + coordX + "-" + `${iKnowSideOfField}`
+        );
+      }
+    } else if (direction == "up") {
+      if (coordY < iKnowSideOfField) {
+        newUnit = document.getElementById(
+          "cell-" + coordX + "-" + (coordY + 1)
+        );
+      } else {
+        newUnit = document.getElementById("cell-" + coordX + "-" + "1");
+      }
+    }
+  } else {
+    if (direction == "right") {
+      newUnit = document.getElementById("cell-" + (coordX + 1) + "-" + coordY);
+    } else if (direction == "left") {
+      newUnit = document.getElementById("cell-" + (coordX - 1) + "-" + coordY);
+    } else if (direction == "down") {
+      newUnit = document.getElementById("cell-" + coordX + "-" + (coordY - 1));
+    } else if (direction == "up") {
+      newUnit = document.getElementById("cell-" + coordX + "-" + (coordY + 1));
+    }
   }
 
   if (!isSnakeUnit(newUnit) && newUnit !== undefined && newUnit !== null) {
@@ -136,6 +190,7 @@ function move() {
   } else {
     finishGame();
   }
+  steps = true;
 }
 
 // Проверяем элемент на принадлежность змейке
@@ -163,7 +218,6 @@ function giveMeFood(unit) {
   }
   return check;
 }
-
 // Создаем яблоко в случайно месте
 function createFood() {
   let foodCreated = false;
@@ -187,23 +241,20 @@ function createFood() {
 }
 
 function changeDirectionSnake(e) {
-  switch (e.key) {
-    case "ArrowLeft":
-      //если нажата клавиша влево если до этого двигались вправо, то ничего не произойдет
-      if (direction != "y-") direction = "y-";
-      break;
-    case "ArrowUp":
-      //если нажата клавиша вверх
-      if (direction != "x-") direction = "x-";
-      break;
-    case "ArrowRight":
-      //если нажата клавиша вправо
-      if (direction != "y+") direction = "y+";
-      break;
-    case "ArrowDown":
-      //если нажата клавиша вниз
-      if (direction != "x+") direction = "x+";
-      break;
+  if (steps == true) {
+    if (e.key === "ArrowLeft" && direction != "right") {
+      direction = "left";
+      steps = false;
+    } else if (e.key === "ArrowUp" && direction != "down") {
+      direction = "up";
+      steps = false;
+    } else if (e.key === "ArrowRight" && direction != "left") {
+      direction = "right";
+      steps = false;
+    } else if (e.key === "ArrowDown" && direction != "up") {
+      direction = "down";
+      steps = false;
+    }
   }
 }
 
@@ -229,7 +280,9 @@ function finishGame() {
     localStorage.setItem("myRecord", myRecord);
   }
 
-  clearInterval(snakeTimer);
+  if (easyLevel) clearInterval(snakeTimerConstant);
+  if (!easyLevel) clearInterval(snakeTimerFast);
+
   console.log("Игра закончена, Вы собрали " + score + " шт. Пикачу");
   alert("Игра закончена, Вы собрали " + score + " шт. Пикачу");
 }
