@@ -26,7 +26,6 @@ body {
   grid-template-columns: repeat(var(--sideField), 25px);
   grid-template-rows: repeat(var(--sideField), 25px);
   gap: 1px;
-  cursor: pointer;
 }
 
 #score,
